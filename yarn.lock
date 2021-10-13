@@ -9334,6 +9334,11 @@
   "resolved" "https://registry.npmjs.org/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz"
   "version" "3.0.4"
 
+"react-multi-select-component@^4.1.13":
+  "integrity" "sha512-+pCqnW7wsoQSGEVChWNg/8hmHoza8cvkzBoVXzo1a9pYI/Cp0onOyJ1yyqNvE62y5EIpTwsnD/qFgljZQwxG6A=="
+  "resolved" "https://registry.npmjs.org/react-multi-select-component/-/react-multi-select-component-4.1.13.tgz"
+  "version" "4.1.13"
+
 "react-popper@^1.3.6":
   "integrity" "sha512-VSA/bS+pSndSF2fiasHK/PTEEAyOpX60+H5EPAjoArr8JGm+oihu4UbrqcEBpQibJxBVCpYyjAX7abJ+7DoYVg=="
   "resolved" "https://registry.npmjs.org/react-popper/-/react-popper-1.3.11.tgz"

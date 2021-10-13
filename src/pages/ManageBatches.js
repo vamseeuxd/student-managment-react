@@ -7,24 +7,41 @@ import {
   ModalBody,
   ModalFooter,
   Button,
+  Badge,
 } from "reactstrap";
+import { MultiSelect } from "react-multi-select-component";
 
 function ManageBatches() {
   const [list, updateList] = useState([]);
+  const [technologies, updateTechnologies] = useState([]);
+  const [students, updateStudents] = useState([]);
+  const [selectedStudents, updateSelectedStudents] = useState([]);
   const [modal, setModal] = useState(false);
   const [editId, setEditId] = useState("");
   const toggle = () => setModal(!modal);
   const technologyNameRef = useRef();
   const durationRef = useRef();
+  const tehcnologyRef = useRef();
+  const studentsRef = useRef();
   const saveData = () => {
     const batchName = technologyNameRef.current.value;
     const duration = durationRef.current.value;
-    if (batchName.trim().length > 0 && duration.trim().length > 0) {
+    const technolgy = tehcnologyRef.current.value;
+    // const selectedStudents = selectedStudents;
+    console.log(selectedStudents);
+    if (
+      batchName.trim().length > 0 &&
+      duration.trim().length > 0 &&
+      technolgy.trim().length > 0 &&
+      selectedStudents.length > 0
+    ) {
       if (editId === "") {
         axios
           .post("https://613ed586e9d92a0017e172ca.mockapi.io/batches", {
             name: batchName,
             duration: duration,
+            technolgy: technolgy,
+            students: selectedStudents.map((student) => student.id),
           })
           .then(function (response) {
             console.log(response);
@@ -37,11 +54,12 @@ function ManageBatches() {
       } else {
         axios
           .put(
-            "https://613ed586e9d92a0017e172ca.mockapi.io/batches/" +
-              editId,
+            "https://613ed586e9d92a0017e172ca.mockapi.io/batches/" + editId,
             {
               name: batchName,
               duration: duration,
+              technolgy: technolgy,
+              students: selectedStudents.map((student) => student.value),
             }
           )
           .then(function (response) {
@@ -81,6 +99,7 @@ function ManageBatches() {
       setEditId(data.id);
       technologyNameRef.current.value = data.name;
       durationRef.current.value = data.duration;
+      tehcnologyRef.current.value = data.technolgy;
     }, 5);
   };
 
@@ -89,8 +108,36 @@ function ManageBatches() {
       .get("https://613ed586e9d92a0017e172ca.mockapi.io/batches")
       .then(function (response) {
         // handle success
-        console.log(response.data);
+        // console.log(response.data);
         updateList(response.data);
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      });
+  };
+
+  const getTechnologies = () => {
+    axios
+      .get("https://613ed586e9d92a0017e172ca.mockapi.io/technologies")
+      .then(function (response) {
+        // handle success
+        // console.log(response.data);
+        updateTechnologies(response.data);
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      });
+  };
+
+  const getStudents = () => {
+    axios
+      .get("https://613ed586e9d92a0017e172ca.mockapi.io/students")
+      .then(function (response) {
+        // handle success
+        console.log(response.data);
+        updateStudents(response.data);
       })
       .catch(function (error) {
         // handle error
@@ -100,7 +147,32 @@ function ManageBatches() {
 
   useEffect(() => {
     getData();
+    getTechnologies();
+    getStudents();
   }, []);
+
+  const getTechnologyName = (id) => {
+    const targetTechnology = technologies.find((technology) => {
+      return technology.id === id;
+    });
+    if (targetTechnology) {
+      return targetTechnology.name;
+    } else {
+      return "";
+    }
+  };
+
+  const getStudentName = (id) => {
+    debugger;
+    const studnet = students.find((studnet) => {
+      return studnet.id === id;
+    });
+    if (studnet) {
+      return studnet.firstName + " " + studnet.lastName;
+    } else {
+      return "";
+    }
+  };
 
   return (
     <div className="row">
@@ -119,6 +191,8 @@ function ManageBatches() {
             <tr>
               <th>Batch Name</th>
               <th>Duration in Hours</th>
+              <th>Technology</th>
+              <th>Students</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -128,6 +202,17 @@ function ManageBatches() {
                 <tr key={item.id}>
                   <td>{item.name}</td>
                   <td>{item.duration}</td>
+                  <td>{getTechnologyName(item.technolgy)}</td>
+                  <td>
+                    {item.students &&
+                      item.students.map((student) => {
+                        return (
+                          <span className="badge bg-primary me-2" key={student}>
+                            {getStudentName(student)}
+                          </span>
+                        );
+                      })}
+                  </td>
                   <td>
                     <button
                       onClick={() => deleteData(item)}
@@ -165,6 +250,35 @@ function ManageBatches() {
               <div className="mb-3">
                 <label className="form-label">Duration</label>
                 <input ref={durationRef} type="text" className="form-control" />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Technology</label>
+                <select ref={tehcnologyRef} className="form-control">
+                  <option>Select Technology</option>
+                  {technologies.map((technolgy) => {
+                    return (
+                      <option key={technolgy.id} value={technolgy.id}>
+                        {technolgy.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Students</label>
+                <MultiSelect
+                  options={students.map((student) => {
+                    return {
+                      label: `${student.firstName}  ${student.lastName}`,
+                      value: student.id,
+                    };
+                  })}
+                  value={selectedStudents}
+                  onChange={updateSelectedStudents}
+                  labelledBy="firstName"
+                />
               </div>
             </form>
           </ModalBody>
